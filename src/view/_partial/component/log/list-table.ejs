@@ -1,0 +1,75 @@
+<%
+var logTypeText, logLevelText, logLevelStyle, logLevelIcon, timestamp;
+%>
+<% if (Log && Log.length > 0) { %>
+<table class="table table-striped">
+    <tr>
+        <th data-toggle="tooltip" data-placement="bottom" title="Label">Label</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Level">Level</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Método">Método</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Recurso">Recurso</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Mensagem">Mensagem</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Registro">Registro</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Vizualizar" class="text-center">Visualizar</th>
+    </tr>
+    <% Log.forEach(function (elem) { %>
+    <%
+        var method = '';
+        var path = '';
+
+        if (elem.label === Enumerator.LogType.API) logTypeText = 'API';
+        else if (elem.label === Enumerator.LogType.ADMIN_UI) logTypeText = 'Área Administrativa';
+        else if (elem.label === Enumerator.LogType.FILE_ORGANIZER) logTypeText = 'Organizador de Arquivos';
+        else if (elem.label === Enumerator.LogType.PREPROCESSOR) logTypeText = 'Pré Processador';
+        else if (elem.label === Enumerator.LogType.PROCESSOR) logTypeText = 'Processador';
+        else if (elem.label === Enumerator.LogType.RESULT_SYNC) logTypeText = 'Sincronizador de Resultados';
+        else if (elem.label === Enumerator.LogType.TASK_SCHEDULER) logTypeText = 'Agendador de Tarefas';
+
+        if (elem.level === Enumerator.LogLevel.ERROR) {
+            logLevelText = "Erro";
+            logLevelStyle = "danger";
+            logLevelIcon = "error_outline";
+        } else if (elem.level === Enumerator.LogLevel.WARNING) {
+            logLevelText = "Atenção";
+            logLevelStyle = "warning";
+            logLevelIcon = "info_outline";
+        } else if (elem.level === Enumerator.LogLevel.INFORMATION) {
+            logLevelText = "Informação";
+            logLevelStyle = "info";
+            logLevelIcon = "info_outline";
+        }
+
+        timestamp = new Date(elem.timestamp);
+        timestamp = timestamp.getDate() + '/' + (timestamp.getMonth()+1) + '/' + timestamp.getFullYear() + ' '
+                + timestamp.getHours() + ':' + timestamp.getMinutes() + ':' + timestamp.getSeconds();
+
+        if (elem.meta.hasOwnProperty("resource")) {
+            if (elem.meta.resource.hasOwnProperty('method')) method = elem.meta.resource.method;
+            else if (elem.meta.resource.hasOwnProperty('process')) method = elem.meta.resource.process;
+            if (elem.meta.resource.hasOwnProperty('path')) path = elem.meta.resource.path;
+        }
+    %>
+
+    <tr>
+        <td><a href="?label=<%= elem.label %>"><%= logTypeText %></a></td>
+        <td><span class="label label-<%= logLevelStyle %>"><a href="?level=<%= elem.level %>"><i class="material-icons"><%= logLevelIcon %></i><%= logLevelText %></a></span></td>
+        <td><%= method %></td>
+        <td><%= path %></td>
+        <td><%= elem.message %></td>
+        <td><%= timestamp %></td>
+        <td class="text-center">
+            <% if (elem.meta.hasOwnProperty('resource') && elem.meta.hasOwnProperty('detail')) { %>
+            <a href="/log/<%= elem._id %>"><i class="material-icons">search</i></a>
+            <% } %>
+        </td>
+    </tr>
+    <% }) %>
+</table>
+<div class="table-heading">
+    <div class="row">
+        <% include ../../component/pagination.ejs %>
+    </div>
+</div>
+<% } else { %>
+<div class="alert alert-info" role="alert"><i class="material-icons">info</i> Não foram encontrados Logs.</div>
+<% } %>

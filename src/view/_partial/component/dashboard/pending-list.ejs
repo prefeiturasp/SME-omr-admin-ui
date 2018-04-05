@@ -1,0 +1,49 @@
+<% if (Pending && Pending.length) { %>
+<div class="table-heading">
+    <div class="row">
+        <h3 class="col-md-10">Próximos para Correção</h3>
+        <div class="col-md-2 pull-right text-right">
+            <a href="/aggregation/?processStatus=2" class="btn pull-right"><i class="material-icons">search</i>Ver Mais</a>
+        </div>
+    </div>
+</div>
+<table class="table table-striped">
+    <tr>
+        <th data-toggle="tooltip" data-placement="bottom" title="ID Externo do Lote">ID Externo do Lote</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="ID Externo da Prova">ID Externo da Prova</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Provas">Total de Provas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Status das Provas">Status das Provas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Tormas Enviadas">Turmas Enviadas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Total de Turmas">Total de Turmas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Status">Status</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Visualizar" class="text-center">Visualizar</th>
+    </tr>
+    <% Pending.forEach(function (pending) { %>
+    <tr>
+        <td><%= pending.externalId %></td>
+        <td><%= pending._template.externalId %></td>
+        <td>
+            <span class="material-icons">done_all</span>
+            <%= pending.exam.total %></td>
+        </span>
+        <td>
+            <span class="label label-success" title="Sucesso"><%= pending.exam.success %></span>
+            <span class="label label-warning" title="Atenção"><%= pending.exam.warning %></span>
+            <span class="label label-danger" title="Error"><%= pending.exam.error %></span>
+        </td>
+        <td>
+            <% if (pending.sync && pending.sync.total > 0 && pending.sync.sent >= 0) { %>
+            <i class="material-icons">done</i><%= pending.sync.sent %>
+            <% } %>
+        </td>
+        <td>
+            <% if (pending.sync && pending.sync.total > 0 && pending.sync.sent >= 0) { %>
+            <i class="material-icons">file_upload</i><%= pending.sync.total %>
+            <% } %>
+        </td>
+        <td><span class="label label-pending"><i class="material-icons">schedule</i>Pendente</span></td>
+        <td class="text-center"><a href="/aggregation/<%= pending._id %>"><i class="material-icons">search</i></a></td>
+    </tr>
+    <% }) %>
+</table>
+<%}%>

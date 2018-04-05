@@ -1,0 +1,87 @@
+<%
+    var templateTypeText, processStatusStyle, processStatusText, processStatusIcon;
+%>
+<% if (Exam && Exam.length) { %>
+<table class="table table-striped">
+    <tr>
+        <th data-toggle="tooltip" data-placement="bottom" title="Aluno">Aluno</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Corretas">Corretas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Incorretas">Incorretas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Nulas">Nulas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Rasuradas">Rasuradas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Status">Status</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Correção Enviada">Correção Enviada</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Visualizar" class="text-center">Visualizar</th>
+    </tr>
+    <% Exam.forEach(function (elem) { %>
+    <%
+        switch (elem.processStatus) {
+            case Enumerator.ProcessStatus.RAW:
+                processStatusStyle = 'info';
+                processStatusText = "Aguardando";
+                processStatusIcon = "schedule";
+                break;
+            case Enumerator.ProcessStatus.PENDING:
+                processStatusStyle = 'pending';
+                processStatusText = "Pendente";
+                processStatusIcon = "schedule";
+                break;
+            case Enumerator.ProcessStatus.PRE_PROCESSING:
+                processStatusStyle = 'warning';
+                processStatusText = "Identificando";
+                processStatusIcon = "play_circle_outline";
+                break;
+            case Enumerator.ProcessStatus.PROCESSING:
+                processStatusStyle = 'processing';
+                processStatusText = "Corrigindo";
+                processStatusIcon = "play_circle_outline";
+                break;
+            case Enumerator.ProcessStatus.ERROR:
+                processStatusStyle = 'danger';
+                processStatusText = "Erro";
+                processStatusIcon = "error_outline";
+                break;
+            case Enumerator.ProcessStatus.WARNING:
+                processStatusStyle = 'warning';
+                processStatusText = "Atenção";
+                processStatusIcon = "info_outline";
+                break;
+            default:
+                processStatusStyle = 'success';
+                processStatusText = "Sucesso";
+                processStatusIcon = "done";
+                break;
+        }
+
+        if (elem.type == Enumerator.TemplateType.KINDERGARTEN) templateTypeText = 'Infantil';
+        else if (elem.type == Enumerator.TemplateType.ELEMENTARY_SCHOOL) templateTypeText = 'Fundamental';
+        else templateTypeText = 'Médio';
+    %>
+    <tr>
+        <td><% if (elem.owner && elem.owner.Student_Id) { %> <%= elem.owner.Student_Id %> <% } else if (elem.owner) { %> <%= elem.owner %> <% } %></td>
+        <td><%= elem.correctCount %></td>
+        <td><%= elem.incorrectCount %></td>
+        <td><%= elem.nullCount %></td>
+        <td><%= elem.erasedCount %></td>
+        <td><span class="label label-<%= processStatusStyle %>"><a href="?processStatus=<%= elem.processStatus %>"><i class="material-icons"><%= processStatusIcon %></i><%= processStatusText %></a></span></td>
+        <td>
+            <% if (elem.sent) { %>
+                <i class="material-icons">done</i>
+            <% } %>
+        </td>
+        <td class="text-center">
+            <% if (elem.processStatus == Enumerator.ProcessStatus.SUCCESS || elem.processStatus == Enumerator.ProcessStatus.WARNING || elem.processStatus == Enumerator.ProcessStatus.ERROR) { %>
+            <a href="/aggregation/<%= elem._aggregation %>/exam/<%= elem._id %>"><i class="material-icons">search</i></a>
+            <% } %>
+        </td>
+    </tr>
+    <% }) %>
+</table>
+<div class="table-heading">
+    <div class="row">
+        <% include ../../component/pagination.ejs %>
+    </div>
+</div>
+<% } else { %>
+<div class="alert alert-info" role="alert"><i class="material-icons">info</i> Não foram encontradas Provas.</div>
+<% } %>

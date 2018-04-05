@@ -1,0 +1,104 @@
+<%
+var processStatusStyle, processStatusText, processStatusIcon;
+%>
+<div class="table-heading">
+    <div class="row">
+        <h3 class="col-md-10">Lotes em Execução</h3>
+        <div class="col-md-2 pull-right text-right">
+            <a href="/aggregation/" class="btn pull-right"><i class="material-icons">search</i>Ver Todos</a>
+        </div>
+    </div>
+
+    <% if (Running && Running.length) { %>
+    <div class="row">
+        <% Running.forEach(function(elem) { %>
+        <%
+            switch (elem.processStatus) {
+                case Enumerator.ProcessStatus.RAW:
+                    processStatusStyle = 'info';
+                    processStatusText = "Aguardando";
+                    processStatusIcon = "schedule";
+                    break;
+                case Enumerator.ProcessStatus.PRE_PROCESSING:
+                    processStatusStyle = 'warning';
+                    processStatusText = "Identificando";
+                    processStatusIcon = "play_circle_outline";
+                    break;
+                case Enumerator.ProcessStatus.PENDING:
+                    processStatusStyle = 'info';
+                    processStatusText = "Pendente";
+                    processStatusIcon = "schedule";
+                    break;
+                case Enumerator.ProcessStatus.PROCESSING:
+                    processStatusStyle = 'processing';
+                    processStatusText = "Corrigindo";
+                    processStatusIcon = "play_circle_outline";
+                    break;
+                case Enumerator.ProcessStatus.ERROR:
+                    processStatusStyle = 'danger';
+                    processStatusText = "Erro";
+                    processStatusIcon = "error_outline";
+                    break;
+                case Enumerator.ProcessStatus.DOWNLOADING:
+                    processStatusStyle = 'download';
+                    processStatusText = "Baixando";
+                    processStatusIcon = "file_download";
+                    break;
+                case Enumerator.ProcessStatus.UPLOADING:
+                    processStatusStyle = 'upload';
+                    processStatusText = "Enviando";
+                    processStatusIcon = "file_upload";
+                    break;
+                default:
+                    processStatusStyle = 'success';
+                    processStatusText = "Finalizado";
+                    processStatusIcon = "done";
+                    break;
+            }
+
+            function zeroFill( number, width )
+            {
+                width -= number.toString().length;
+                if ( width > 0 )
+                {
+                    return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
+                }
+                return number + "";
+            }
+        %>
+        <div class="col-md-3">
+            <div class="panel panel-<%= processStatusStyle %>">
+                <div class="panel-heading">
+                    <span><b>ID Externo do Lote:</b> <%= elem.externalId %></span><br />
+                    <span><b>ID Externo da Prova:</b> <%= elem._template.externalId %></span><br />
+                </div>
+                <div class="panel-body">
+                    <div class="col-md-6 text-center">
+                        <h4>Total</h4>
+                        <h1><%= elem.exam.total %></h1>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <h4>Processadas</h4>
+                        <span class="label label-success" title="Sucesso"><%= zeroFill(elem.exam.success, 2); %></span>
+                        <span class="label label-warning" title="Atenção"><%= zeroFill(elem.exam.warning, 2) %></span>
+                        <span class="label label-danger" title="Error"><%= zeroFill(elem.exam.error, 2) %></span>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <span class="label label-<%= processStatusStyle %>"><a href="/aggregation/?processStatus=<%= elem.processStatus %>"><i class="material-icons"><%= processStatusIcon %></i><%= processStatusText %></a></span>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <a href="/aggregation/<%= elem._id %>" class="">Visualizar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% }) %>
+    </div>
+    <% } else { %>
+    <div class="alert alert-info" role="alert"><i class="material-icons">info</i> Não foram encontrados Lotes em execução.</div>
+    <% } %>
+</div>

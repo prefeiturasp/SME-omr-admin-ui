@@ -1,0 +1,49 @@
+<% if (Raw && Raw.length) { %>
+<div class="table-heading">
+    <div class="row">
+        <h3 class="col-md-10">Próximos para Identificação</h3>
+        <div class="col-md-2 pull-right text-right">
+            <a href="/aggregation/?processStatus=0" class="btn pull-right"><i class="material-icons">search</i>Ver Mais</a>
+        </div>
+    </div>
+</div>
+<table class="table table-striped">
+    <tr>
+        <th data-toggle="tooltip" data-placement="bottom" title="ID Externo do Lote">ID Externo do Lote</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="ID Externo da Prova">ID Externo da Prova</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Provas">Total de Provas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Status das Provas">Status das Provas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Tormas Enviadas">Turmas Enviadas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Total de Turmas">Total de Turmas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Status">Status</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Visualizar" class="text-center">Visualizar</th>
+    </tr>
+    <% Raw.forEach(function (raw) { %>
+    <tr>
+        <td><%= raw.externalId %></td>
+        <td><%= raw._template.externalId %></td>
+        <td>
+            <span class="material-icons">done_all</span>
+            <%= raw.exam.total %></td>
+        </span>
+        <td>
+            <span class="label label-success" title="Sucesso"><%= raw.exam.success %></span>
+            <span class="label label-warning" title="Atenção"><%= raw.exam.warning %></span>
+            <span class="label label-danger" title="Error"><%= raw.exam.error %></span>
+        </td>
+        <td>
+            <% if (raw.sync && raw.sync.total > 0 && raw.sync.sent >= 0) { %>
+            <i class="material-icons">done</i><%= raw.sync.sent %>
+            <% } %>
+        </td>
+        <td>
+            <% if (raw.sync && raw.sync.total > 0 && raw.sync.sent >= 0) { %>
+            <i class="material-icons">file_upload</i><%= raw.sync.total %>
+            <% } %>
+        </td>
+        <td><span class="label label-info"><i class="material-icons">schedule</i>Aguardando</span></td>
+        <td class="text-center"><a href="/aggregation/<%= raw._id %>"><i class="material-icons">search</i></a></td>
+    </tr>
+    <% }) %>
+</table>
+<%}%>

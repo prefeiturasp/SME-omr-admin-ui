@@ -1,0 +1,215 @@
+<% include ../../_partial/header.ejs %>
+<% include ../../_partial/navbar.ejs %>
+
+<div class="heading-page">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li><a href="/">Dashboard</a></li>
+            <li><a href="/log">Logs</a></li>
+            <li class="active">Detalhe</li>
+        </ol>
+        <h2>Log - <%= Log._id %></h2>
+    </div>
+</div>
+
+<%
+    var logTypeText, logLevelText, logLevelStyle, logLevelIcon, timestamp;
+
+    timestamp = new Date(Log.timestamp);
+    timestamp = timestamp.getDate() + '/' + (timestamp.getMonth()+1) + '/' + timestamp.getFullYear() + ' '
+        + timestamp.getHours() + ':' + timestamp.getMinutes() + ':' + timestamp.getSeconds();
+
+    if (Log.label == Enumerator.LogType.API) logTypeText = 'API';
+    else if (Log.label == Enumerator.LogType.ADMIN_UI) logTypeText = 'Área Administrativa';
+    else if (Log.label == Enumerator.LogType.PREPROCESSOR) logTypeText = 'Pré-processador';
+    else if (Log.label == Enumerator.LogType.PROCESSOR) logTypeText = 'Processador';
+
+    if (Log.level == Enumerator.LogLevel.ERROR) {
+        logLevelText = "Erro";
+        logLevelStyle = "danger";
+        logLevelIcon = "error_outline";
+    } else if (Log.level == Enumerator.LogLevel.WARNING) {
+        logLevelText = "Atenção";
+        logLevelStyle = "warning";
+        logLevelIcon = "info_outline";
+    } else if (Log.level == Enumerator.LogLevel.INFORMATION) {
+        logLevelText = "Informação";
+        logLevelStyle = "info";
+        logLevelIcon = "info_outline";
+    }
+
+    var authText;
+
+    if (Log.meta.detail.user && Log.meta.detail.user.authType == Enumerator.AuthenticationType.LOCAL) authText = 'Local';
+    else if (Log.meta.detail.user && Log.meta.detail.user.authType == Enumerator.AuthenticationType.CORESSO_SAML) authText = 'CoreSSO SAML';
+%>
+<div class="apoio">
+    <div class="container">
+        <ul class="info-bar inverse">
+            <li>
+                <a href="/log"><i class="material-icons">arrow_back</i></a>
+            </li>
+            <li>
+                <span>
+                    <span class="indicador">Label</span>
+                    <a href="/log?label=<%= Log.label %>"><%= logTypeText %></a>
+                </span>
+            </li>
+            <li>
+                <span>
+                    <span class="indicador">Level</span>
+                    <span class="label label-<%= logLevelStyle %>"><a href="/log?level=<%= Log.level %>"><i class="material-icons"><%= logLevelIcon %></i><%= logLevelText %></a></span>
+                </span>
+            </li>
+            <li>
+                <span>
+                    <span class="indicador">Registro</span> <%= timestamp %>
+                </span>
+            </li>
+            <% if (Log.meta.detail.user) { %>
+            <li>
+                <span>
+                    <span class="indicador">Tipo de Autenticação</span> <%= authText %>
+                </span>
+            </li>
+            <li>
+                <span>
+                    <span class="indicador">Login</span> <%= Log.meta.detail.user.login %>
+                </span>
+            </li>
+            <% } %>
+        </ul>
+    </div>
+</div>
+
+<article class="container container-principal">
+    <div class="table-heading">
+        <div class="row">
+            <h1 class="col-md-10">Log</h1>
+        </div>
+        <div class="row">
+            <ul class="info-bar col-md-10">
+                <% if (Log.meta.resource.method) { %>
+                <li>
+                    <i class="material-icons">http</i>
+                    <span>
+                        <span class="indicador">Método</span> <%= Log.meta.resource.method %>
+                    </span>
+                </li>
+                <% } %>
+                <% if (Log.meta.resource.path) { %>
+                <li>
+                    <i class="material-icons">language</i>
+                    <span>
+                        <span class="indicador">URL</span> <%= Log.meta.resource.path %>
+                    </span>
+                </li>
+                <% } %>
+                <% if (Log.meta.detail.httpStatusCode) { %>
+                <li>
+                    <i class="material-icons">code</i>
+                    <span>
+                        <span class="indicador">HTTP Status Code</span> <%= Log.meta.detail.httpStatusCode %>
+                    </span>
+                </li>
+                <% } %>
+                <% if (Log.meta.resource.process) { %>
+                <li>
+                    <i class="material-icons">code</i>
+                    <span>
+                        <span class="indicador">Processo</span> <%= Log.meta.resource.process %>
+                    </span>
+                </li>
+                <% } %>
+                <% if (Log.meta.detail.image) { %>
+                <li>
+                    <i class="material-icons">code</i>
+                    <span>
+                        <span class="indicador">Prova</span>
+                        <a href="/exam/<%= Log.meta.detail.image %>"><%= Log.meta.detail.image %></a>
+                    </span>
+                </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+    <div class="table-heading">
+        <div class="row">
+            <h3 class="col-md-10">Descrição</h3>
+        </div>
+    </div>
+    <table class="table table-striped">
+        <tr>
+            <td>Mensagem</td>
+            <td><%= Log.meta.resource.params %></td>
+        </tr>
+        <% if (Log.level == Enumerator.LogLevel.ERROR
+                && Log.meta.hasOwnProperty('detail')
+                && Log.meta.detail.hasOwnProperty('description')
+                && Log.meta.detail.description.hasOwnProperty('stack')) { %>
+        <tr>
+            <td>Erro</td>
+            <td><%= Log.meta.detail.description.stack %></td>
+        </tr>
+        <% } %>
+    </table>
+    <% if (Log.meta.detail.hasOwnProperty('header') && Log.meta.detail.header != undefined) { %>
+    <div class="table-heading">
+        <div class="row">
+            <h3 class="col-md-10">Cabeçalhos</h3>
+        </div>
+    </div>
+    <table class="table table-striped">
+        <% for (var k in Log.meta.detail.header) { %>
+        <tr>
+            <td><%= k %></td>
+            <td class="break-line"><%= Log.meta.detail.header[k]%></td>
+        </tr>
+        <% } %>
+    </table>
+    <% } %>
+    <% if (Log.meta.detail.hasOwnProperty('body') && Log.meta.detail.body != undefined) { %>
+    <div class="table-heading">
+        <div class="row">
+            <h3 class="col-md-10">Corpo</h3>
+        </div>
+    </div>
+
+    <table class="table table-striped">
+        <% for (var k in Log.meta.detail.body) { %>
+        <tr>
+            <td><%= k %></td>
+            <td class="break-line">
+                <%  if (Log.meta.detail.body[k].constructor ==  Object) { %>
+                <table class="table table-striped">
+                    <% for (var j in Log.meta.detail.body[k]) { %>
+                    <tr>
+                        <td><%= j %></td>
+                        <td><%= Log.meta.detail.body[k][j] %></td>
+                    </tr>
+                    <% } %>
+                </table>
+                <% } else { %>
+                <%= Log.meta.detail.body[k] %>
+                <% } %>
+            </td>
+        </tr>
+        <% } %>
+    </table>
+    <% } %>
+
+    <% if (Log.pre_result || Log.result || Log.equalized) { %>
+    <div class="table-heading">
+        <div class="row">
+            <h3 class="col-md-10">Imagens</h3>
+        </div>
+    </div>
+    <div class="row">
+        <% if (Log.pre_result) { %><a href="<%=Log.pre_result%>" target="_blank"><img class="col-md-4 img-thumbnail" src="<%=Log.pre_result%>" /></a><% } %>
+        <% if (Log.result) { %><a href="<%=Log.result%>" target="_blank"><img class="col-md-4 img-thumbnail" src="<%=Log.result %>" /></a><% } %>
+        <% if (Log.equalized) { %><a href="<%=Log.equalized%>" target="_blank"><img class="col-md-4 img-thumbnail" src="<%=Log.equalized%>" /></a><% } %>
+    </div>
+    <% } %>
+</article>
+
+<% include ../../_partial/footer.ejs %>

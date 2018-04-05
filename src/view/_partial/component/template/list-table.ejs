@@ -1,0 +1,32 @@
+<%
+    var templateTypeText;
+%>
+<% if (Template && Template.length) { %>
+<table class="table table-striped">
+    <tr>
+        <th data-toggle="tooltip" data-placement="bottom" title="ID Externo">ID Externo</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Questões">Questões</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Alternativas">Alternativas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Colunas">Colunas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Identificação">Identificação</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Visualizar" class="text-center">Visualizar</th>
+    </tr>
+    <% Template.forEach(function (elem) { %>
+    <tr>
+        <td><%= elem.externalId %></td>
+        <td><%= elem.questions %></td>
+        <td><%= elem.alternatives %></td>
+        <td><%= elem.columns %></td>
+        <td><% if (elem.qrCode) { %> QR Code <% } else { %> Manual <% } %></td>
+        <td class="text-center"><a href="/template/<%= elem._id %>"><i class="material-icons">search</i></a></td>
+    </tr>
+    <% }) %>
+</table>
+<div class="table-heading">
+    <div class="row">
+        <% include ../../component/pagination.ejs %>
+    </div>
+</div>
+<% } else { %>
+<div class="alert alert-info" role="alert"><i class="material-icons">info</i> Não foram encontrados Gabaritos.</div>
+<% } %>

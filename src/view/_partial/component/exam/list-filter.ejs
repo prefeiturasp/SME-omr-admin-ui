@@ -1,0 +1,52 @@
+<div class="table-heading">
+    <div class="row">
+        <div class="col-md-6">
+            <a id="toggleFilter" href="javascript:void(0);" class="btn btn-default">
+                <i class="material-icons">filter_list</i> Filtrar
+            </a>
+        </div>
+        <div class="col-md-6">
+            <% include ../../component/pagination.ejs %>
+        </div>
+    </div>
+    <div id="filterArea" class="row hide">
+        <form method="get" class="form-materials">
+            <div class="row">
+                <div class="form-group col-md-3">
+                    <label>Status</label>
+                    <div class="select-field">
+                        <select class="form-control" name="processStatus">
+                            <option value="">-- Selecione o Status --</option>
+                            <% ProcessStatus.forEach(function (elem) { %>
+                            <option value="<%= elem._id %>" <%= elem.selected %>><%= elem.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 col-md-offset-8">
+                    <a id="hideFilter" href="javascript:void(0);" class='btn btn-default'>Cancelar</a>
+                    <a href="/aggregation/<%= AggregationId %>/exam" class='btn btn-default'>Resetar</a>
+                    <button class='btn btn-primary' type="submit">Pesquisar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var toggleFilter = document.getElementById('toggleFilter'),
+            hideFilter = document.getElementById('hideFilter'),
+            filterArea = document.getElementById('filterArea');
+
+        toggleFilter.addEventListener('click', function () {
+            Util.CSS.swapClass(filterArea, 'hide');
+        });
+
+        hideFilter.addEventListener('click', function () {
+            Util.CSS.addClass(filterArea, 'hide');
+        });
+    });
+</script>

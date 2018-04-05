@@ -1,0 +1,30 @@
+<form method="post" action="/auth/signin" class="col-md-4 col-md-offset-4 form-materials">
+    <% if (errorMessage) { %>
+    <p class="alert alert-danger"><%= errorMessage %></p>
+    <% } %>
+
+    <div class="panel panel-default login-box">
+
+        <div class="panel-body">
+            <div class="form-group">
+                <div class="group">
+                    <input name="login" type="text" required>
+                    <span class="highlight"></span>
+                    <span class="bar"></span>
+                    <label class="label-animated">Login</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="group">
+                    <input name="password" type="password" required>
+                    <span class="highlight"></span>
+                    <span class="bar"></span>
+                    <label class="label-animated">Password</label>
+                </div>
+            </div>
+        </div>
+        <div class="panel-footer text-right">
+            <button type="submit" class="btn btn-primary">Entrar</button>
+        </div>
+    </div>
+</form>

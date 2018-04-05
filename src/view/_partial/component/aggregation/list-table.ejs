@@ -1,0 +1,95 @@
+<%
+var processStatusStyle, processStatusText, processStatusIcon;
+%>
+<% if (Aggregation && Aggregation.length > 0) { %>
+<table class="table table-striped">
+    <tr>
+        <th data-toggle="tooltip" data-placement="bottom" title="ID Externo do Lote">ID Externo do Lote</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="ID Externo da Prova">ID Externo da Prova</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Provas">Total de Provas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Status das Provas">Status das Provas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Tormas Enviadas">Turmas Enviadas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Total de Turmas">Total de Turmas</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Status">Status</th>
+        <th data-toggle="tooltip" data-placement="bottom" title="Visualizar" class="text-center">Visualizar</th>
+    </tr>
+    <% Aggregation.forEach(function (elem) { %>
+    <%
+        switch (elem.processStatus) {
+            case Enumerator.ProcessStatus.RAW:
+                processStatusStyle = 'info';
+                processStatusText = "Aguardando";
+                processStatusIcon = "schedule";
+                break;
+            case Enumerator.ProcessStatus.PRE_PROCESSING:
+                processStatusStyle = 'warning';
+                processStatusText = "Identificando";
+                processStatusIcon = "play_circle_outline";
+                break;
+            case Enumerator.ProcessStatus.PENDING:
+                processStatusStyle = 'pending';
+                processStatusText = "Pendente";
+                processStatusIcon = "schedule";
+                break;
+            case Enumerator.ProcessStatus.PROCESSING:
+                processStatusStyle = 'processing';
+                processStatusText = "Corrigindo";
+                processStatusIcon = "play_circle_outline";
+                break;
+            case Enumerator.ProcessStatus.ERROR:
+                processStatusStyle = 'danger';
+                processStatusText = "Erro";
+                processStatusIcon = "error_outline";
+                break;
+            case Enumerator.ProcessStatus.DOWNLOADING:
+                processStatusStyle = 'download';
+                processStatusText = "Baixando";
+                processStatusIcon = "file_download";
+                break;
+            case Enumerator.ProcessStatus.UPLOADING:
+                processStatusStyle = 'upload';
+                processStatusText = "Enviando";
+                processStatusIcon = "file_upload";
+                break;
+            default:
+                processStatusStyle = 'success';
+                processStatusText = "Finalizado";
+                processStatusIcon = "done";
+                break;
+        }
+    %>
+    <tr>
+        <td><%= elem.externalId %></td>
+        <td><%= elem._template.externalId %></td>
+        <td>
+            <span class="material-icons">done_all</span>
+            <%= elem.exam.total %></td>
+            </span>
+        <td>
+            <span class="label label-success" title="Sucesso"><%= elem.exam.success %></span>
+            <span class="label label-warning" title="Atenção"><%= elem.exam.warning %></span>
+            <span class="label label-danger" title="Error"><%= elem.exam.error %></span>
+        </td>
+        <td>
+            <% if (elem.sync && elem.sync.total > 0 && elem.sync.sent >= 0) { %>
+                <i class="material-icons">done</i><%= elem.sync.sent %>
+            <% } %>
+        </td>
+        <td>
+            <% if (elem.sync && elem.sync.total > 0 && elem.sync.sent >= 0) { %>
+            <i class="material-icons">file_upload</i><%= elem.sync.total %>
+            <% } %>
+        </td>
+        <td><span class="label label-<%= processStatusStyle %>"><a href="/aggregation/?processStatus=<%= elem.processStatus %>"><i class="material-icons"><%= processStatusIcon %></i><%= processStatusText %></a></span></td>
+        <td class="text-center"><a href="/aggregation/<%= elem._id %>"><i class="material-icons">search</i></a></td>
+    </tr>
+    <% }) %>
+</table>
+<div class="table-heading">
+    <div class="row">
+        <% include ../../component/pagination.ejs %>
+    </div>
+</div>
+<% } else { %>
+<div class="alert alert-info" role="alert"><i class="material-icons">info</i> Não foram encontrados Lotes.</div>
+<% } %>

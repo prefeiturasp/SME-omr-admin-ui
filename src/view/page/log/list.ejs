@@ -1,0 +1,18 @@
+<% include ../../_partial/header.ejs %>
+<% include ../../_partial/navbar.ejs %>
+
+<div class="heading-page">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li><a href="/">Dashboard</a></li>
+            <li class="active">Logs</li>
+        </ol>
+        <h2>Logs</h2>
+    </div>
+</div>
+<article class="container container-principal">
+    <% include ../../_partial/component/log/list-filter.ejs %>
+    <% include ../../_partial/component/log/list-table.ejs %>
+</article>
+
+<% include ../../_partial/footer.ejs %>

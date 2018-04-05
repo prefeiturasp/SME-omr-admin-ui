@@ -1,0 +1,207 @@
+<% include ../../_partial/header.ejs %>
+<% include ../../_partial/navbar.ejs %>
+<%
+var processStatusStyle, processStatusText, processStatusIcon, lastRunAt, nextRunAt, lockedAt, alterationDate;
+
+function zeroFill( number, width )
+{
+    width -= number.toString().length;
+    if ( width > 0 )
+    {
+        return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
+    }
+    return number + "";
+}
+%>
+<div class="heading-page">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li><a href="/">Dashboard</a></li>
+            <li class="active">Tarefas</li>
+        </ol>
+        <h2>Gerenciador de Tarefas %></h2>
+    </div>
+</div>
+<article class="container container-principal">
+    <div class="table-heading">
+        <div class="row">
+            <h1 class="col-md-10">Lotes em Execução</h1>
+
+            <div class="col-md-2 pull-right text-right">
+                <a href="/aggregation" class="btn pull-right"><i class="material-icons">search</i>Todos os Lotes</a>
+            </div>
+        </div>
+    </div>
+    <% if (Aggregation && Aggregation.length > 0) { %>
+    <form method="post" id="frmTask">
+        <input id="_id" type="hidden" name="_id" value="" />
+        <input id="processStatus" type="hidden" name="processStatus" value="" />
+        <table class="table table-striped">
+            <tr>
+                <th data-toggle="tooltip" data-placement="bottom" title="ID">ID</th>
+                <th data-toggle="tooltip" data-placement="bottom" title="ID Externo do Lote">ID Externo do Lote</th>
+                <th data-toggle="tooltip" data-placement="bottom" title="ID Externo da Prova">ID Externo da Prova</th>
+                <th data-toggle="tooltip" data-placement="bottom" title="Provas em Execução">Provas em Execução</th>
+                <th data-toggle="tooltip" data-placement="bottom" title="Última Alteração">Última Alteração</th>
+                <th data-toggle="tooltip" data-placement="bottom" title="Status">Status</th>
+                <th data-toggle="tooltip" data-placement="bottom" title="Visualizar" class="text-center">Resetar</th>
+            </tr>
+            <% Aggregation.forEach(function (elem) { %>
+                <%
+                    if (elem.processStatus == Enumerator.ProcessStatus.PRE_PROCESSING) {
+                        processStatusStyle = 'warning';
+                        processStatusText = "Identificando";
+                        processStatusIcon = "play_circle_outline";
+                    } else if (elem.processStatus == Enumerator.ProcessStatus.PROCESSING) {
+                        processStatusStyle = 'processing';
+                        processStatusText = "Corrigindo";
+                        processStatusIcon = "play_circle_outline";
+                    } else {
+                        processStatusStyle = 'download';
+                        processStatusText = "Baixando";
+                        processStatusIcon = "file_download";
+                    }
+
+                    if (elem.exam.alterationDate) {
+                        alterationDate = new Date(elem.exam.alterationDate);
+                        alterationDate = zeroFill(alterationDate.getDate(), 2) + '/' + zeroFill((alterationDate.getMonth()+1),2) + '/' + alterationDate.getFullYear() + ' '
+                                + zeroFill(alterationDate.getHours(), 2) + ':' + zeroFill(alterationDate.getMinutes(), 2) + ':' + zeroFill(alterationDate.getSeconds(), 2);
+                    } else {
+                        alterationDate = '-';
+                    }
+                %>
+                <tr>
+                    <td><a href="/aggregation/<%= elem._id %>"><%= elem._id %></a></td>
+                    <td><%= elem.externalId %></td>
+                    <td><%= elem._template.externalId %></td>
+                    <td><%= elem.exam.running %></td>
+                    <td><%= alterationDate %></td>
+                    <td><span class="label label-<%= processStatusStyle %>"><a href="/aggregation/?processStatus=<%= elem.processStatus %>"><i class="material-icons"><%= processStatusIcon %></i><%= processStatusText %></a></span></td>
+                    <td>
+                        <% if (elem.processStatus !== Enumerator.ProcessStatus.DOWNLOADING) { %>
+                        <a href="javascript:void(0);" onclick='resetAggregation(<%-JSON.stringify(elem)%>);' title="Resetar"><i class="material-icons">clear</i></a>
+                        <%}%>
+                    </td>
+                </tr>
+            <% }) %>
+        </table>
+    </form>
+    <% } else { %>
+    <div class="alert alert-info" role="alert"><i class="material-icons">info</i> Não foram encontrados lotes em execução.</div>
+    <% } %>
+
+    <div class="table-heading">
+        <div class="row">
+            <h1 class="col-md-10">Tarefas Agendadas</h1>
+        </div>
+    </div>
+    <% if (Task && Task.length > 0) { %>
+    <table class="table table-striped">
+        <tr>
+            <th data-toggle="tooltip" data-placement="bottom" title="Tarefa">Tarefa</th>
+            <th data-toggle="tooltip" data-placement="bottom" title="Intervalo">Intervalo</th>
+            <th data-toggle="tooltip" data-placement="bottom" title="Última Execução">Última Execução</th>
+            <th data-toggle="tooltip" data-placement="bottom" title="Próxima Execução">Próxima Execução</th>
+            <th data-toggle="tooltip" data-placement="bottom" title="Reservado em">Reservado em</th>
+            <th data-toggle="tooltip" data-placement="bottom" title="Status">Status</th>
+        </tr>
+        <% Task.forEach(function (elem) { %>
+        <%
+            var status = {
+                scheduled: false,
+                queued: false,
+                running: false,
+                completed: false,
+                failed: false
+            };
+
+            if (elem.attrs.lastRunAt != null) {
+                lastRunAt = new Date(elem.attrs.lastRunAt);
+                lastRunAt = zeroFill(lastRunAt.getDate(), 2) + '/' + zeroFill((lastRunAt.getMonth()+1),2) + '/' + lastRunAt.getFullYear() + ' '
+                        + zeroFill(lastRunAt.getHours(), 2) + ':' + zeroFill(lastRunAt.getMinutes(), 2) + ':' + zeroFill(lastRunAt.getSeconds(), 2);
+            } else {
+                lastRunAt = '-';
+            }
+
+            if (elem.attrs.nextRunAt && elem.attrs.repeatInterval) {
+                nextRunAt = new Date(elem.attrs.nextRunAt);
+                nextRunAt = zeroFill(nextRunAt.getDate(), 2) + '/' + zeroFill((nextRunAt.getMonth()+1),2) + '/' + nextRunAt.getFullYear() + ' '
+                        + zeroFill(nextRunAt.getHours(), 2) + ':' + zeroFill(nextRunAt.getMinutes(), 2) + ':' + zeroFill(nextRunAt.getSeconds(), 2);
+            } else {
+                nextRunAt = '-';
+            }
+
+            if (elem.attrs.lockedAt != null) {
+                lockedAt = new Date(elem.attrs.lockedAt);
+                lockedAt = zeroFill(lockedAt.getDate(), 2) + '/' + zeroFill((lockedAt.getMonth()+1),2) + '/' + lockedAt.getFullYear() + ' '
+                        + zeroFill(lockedAt.getHours(), 2) + ':' + zeroFill(lockedAt.getMinutes(), 2) + ':' + zeroFill(lockedAt.getSeconds(), 2);
+            } else {
+                lockedAt = '-';
+            }
+
+            if (elem.attrs.repeatInterval == null) elem.attrs.repeatInterval = 0;
+            if (elem.attrs.nextRunAt == null && elem.attrs.repeatInterval) elem.attrs.nextRunAt = 0;
+            if (elem.attrs.lastRunAt == null) elem.attrs.lastRunAt = 0;
+            if (elem.attrs.lastFinishedAt == null) elem.attrs.lastFinishedAt = 0;
+            if (elem.attrs.failedAt == null) elem.attrs.failedAt = 0;
+            if (elem.attrs.lockedAt == null) elem.attrs.lockedAt = 0;
+
+            if (elem.attrs.nextRunAt&& elem.attrs.nextRunAt >= new Date()) status.scheduled = true;
+            if (elem.attrs.nextRunAt && elem.attrs.lastFinishedAt && new Date() >= elem.attrs.nextRunAt && elem.attrs.nextRunAt >= elem.attrs.lastFinishedAt) status.queued = true;
+            if (elem.attrs.lockedAt && elem.attrs.lastRunAt && elem.attrs.lastRunAt > elem.attrs.lastFinishedAt) status.running = true;
+            if (elem.attrs.lastFinishedAt && elem.attrs.lastFinishedAt > elem.attrs.failedAt) status.completed = true;
+            if (elem.attrs.lastFinishedAt && elem.attrs.failedAt && elem.attrs.lastFinishedAt.getTime() == elem.attrs.failedAt.getTime()) status.failed = true;
+        %>
+        <tr>
+            <td><%= elem.attrs.name %></td>
+            <td><%= elem.attrs.repeatInterval %></td>
+            <td><%= lastRunAt %></td>
+            <td><%= nextRunAt %></td>
+            <td><%= lockedAt %></td>
+            <td>
+                <% if (status.scheduled) { %><span class="tiny label label-info">Agendado</span><%}%>
+                <% if (status.queued) { %><span class="tiny label label-primary">Aguardando</span><%}%>
+                <% if (status.running) { %><span class="tiny label label-warning">Executando</span><%}%>
+                <% if (status.completed) { %><span class="tiny label label-success">Finalizado</span><%}%>
+                <% if (status.failed) { %><span class="tiny label label-danger">Falha</span><%}%>
+            </td>
+        </tr>
+        <% }) %>
+    </table>
+    <% } else { %>
+    <div class="alert alert-info" role="alert"><i class="material-icons">info</i> Não foram encontradas tarefas agendadas.</div>
+    <% } %>
+    <div class="table-heading">
+        <div class="row">
+            <h4 class="col-md-10">Tarefas Agendadas</h4>
+        </div>
+        <table class="table table-striped">
+            <tr>
+                <th data-toggle="tooltip" data-placement="bottom" title="Status">Status</th>
+                <th data-toggle="tooltip" data-placement="bottom" title="Descrição">Descrição</th>
+            </tr>
+            <tr>
+                <td><span class="tiny label label-info">Agendado</span></td>
+                <td>A tarefa está agendada para execução.</td>
+            </tr>
+            <tr>
+                <td><span class="tiny label label-primary">Aguardando</span></td>
+                <td>O horário programado para a execução da tarefa já chegou porém a mesma não está sendo executada. Isto pode ocorrer por dois motivos: 1. A execução anterior da tarefa ainda não acabou. 2. O agendador de tarefas não está executando.</td>
+            </tr>
+            <tr>
+                <td><span class="tiny label label-warning">Executando</span></td>
+                <td>A tarefa está sendo executada.</td>
+            </tr>
+            <tr>
+                <td><span class="tiny label label-success">Finalizado</span></td>
+                <td>A última execução da tarefa foi finalizada com sucesso.</td>
+            </tr>
+            <tr>
+                <td><span class="tiny label label-danger">Falha</span></td>
+                <td>A última execução da tarefa foi finalizada com erro.</td>
+            </tr>
+        </table>
+    </div>
+</article>
+<script src="/js/component/TaskManager.js"></script>
+<% include ../../_partial/footer.ejs %>

@@ -1,0 +1,87 @@
+<% include ../../_partial/header.ejs %>
+<% include ../../_partial/navbar.ejs %>
+
+<div class="heading-page">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li><a href="/">Dashboard</a></li>
+            <li><a href="/template">Gabaritos</a></li>
+            <li class="active">Detalhe</li>
+        </ol>
+        <h2>Gabarito - <%= Template._id %></h2>
+    </div>
+</div>
+<%
+var Columns, templateTypeText;
+Helper.Template.SetUp(
+    Template.items,
+    Template.columns
+);
+
+
+if (Template.type == Enumerator.TemplateType.KINDERGARTEN) templateTypeText = 'Infantil';
+else if (Template.type == Enumerator.TemplateType.ELEMENTARY_SCHOOL) templateTypeText = 'Fundamental';
+else templateTypeText = 'Médio';
+
+Columns = Helper.Template.ColumnsData;
+%>
+
+<div class="apoio">
+    <div class="container">
+        <ul class="info-bar inverse">
+            <li>
+                <a href="/template"><i class="material-icons">arrow_back</i></a>
+            </li>
+            <li>
+                <span>
+                    <span class="indicador">ID Externo</span> <%= Template.externalId %>
+                </span>
+            </li>
+            <li>
+                <span>
+                    <span class="indicador">Tipo de Prova</span>
+                    <a href="/template?type=<%= Template.type %>"><%= templateTypeText %></a>
+                </span>
+            </li>
+            <li>
+                <span>
+                    <span class="indicador">Questões</span> <%= Template.questions %>
+                </span>
+            </li>
+            <li>
+                <span>
+                    <span class="indicador">Alternativas</span> <%= Template.alternatives %>
+                </span>
+            </li>
+        </ul>
+    </div>
+</div>
+<article class="container container-principal">
+    <div class="table-heading">
+        <div class="row">
+            <h1 class="col-md-12">Gabarito</h1>
+        </div>
+    </div>
+    <div class="row template">
+        <% Columns.forEach(function(column, colI) {%>
+        <div class="col-md-3">
+            <table class="table table-striped">
+                <tr>
+                    <th colspan="<%= Template.alternatives + 1%>"></th>
+                </tr>
+                <% column.forEach(function(question, queI) { %>
+                <tr>
+                    <td class="template-question"><%=queI + Helper.Template.Lines * colI + 1%></td>
+                    <% for (var i = 0; i < Template.alternatives; i++) { %>
+                    <td class="<%= (question.correctId == question.answers[i]? 'label-primary has-template': '') %>"><%= String.fromCharCode(97 + i).toUpperCase() %></td>
+                    <% } %>
+                </tr>
+                <% }) %>
+            </table>
+
+        </div>
+        <% }) %>
+    </div>
+</article>
+
+<% include ../../_partial/footer.ejs %>

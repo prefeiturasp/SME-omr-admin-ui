@@ -1,0 +1,30 @@
+<% include component/menu.ejs %>
+<header class="header">
+    <div class="pull-left">
+        <ul class="toolbar-user">
+            <% if (User) { %>
+            <li><a id="sideMenuButton" class="btn-menu-off-canvas"><i class="material-icons">menu</i> Menu</a></li>
+            <% } %>
+            <li>
+                <h1 class="logo">MStech OMR Admin</h1></li>
+        </ul>
+    </div>
+    <% if (User) { %>
+    <div class="pull-right">
+        <ul class="toolbar-user">
+            <li><span>Bem-vindo, <strong><%= User.name %></strong></span></li>
+            <% if (Config.Auth.TYPE == Enumerator.AuthenticationType.CORESSO_SAML) { %>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="material-icons">apps</i> Sistemas</a>
+                    <ul class="dropdown-menu">
+                        <% User.authentication.saml.systems.forEach(function(system){ %>
+                            <li><a href="<%= system.url %>"><%= system.name %></a></li>
+                        <% }); %>
+                    </ul>
+                </li>
+            <% } %>
+            <li><a href="/auth/signout"><i class="material-icons">exit_to_app</i> Sair</a></li>
+        </ul>
+    </div>
+    <% } %>
+</header>

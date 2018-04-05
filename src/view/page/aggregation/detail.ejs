@@ -1,0 +1,199 @@
+<% include ../../_partial/header.ejs %>
+<% include ../../_partial/navbar.ejs %>
+
+<div class="heading-page">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li><a href="/">Dashboard</a></li>
+            <li><a href="/aggregation">Lotes</a></li>
+            <li class="active">Detalhe</li>
+        </ol>
+        <h2>Lote - <%= Aggregation._id %></h2>
+    </div>
+</div>
+<%
+    var processStatusStyle, processStatusText, processDate, templateTypeText, processStatusIcon;
+
+    processDate = new Date(Aggregation.alterationDate);
+    processDate = processDate.getDate() + '/' + (processDate.getMonth()+1) + '/' + processDate.getFullYear() + ' '
+            + processDate.getHours() + ':' + processDate.getMinutes() + ':' + processDate.getSeconds();
+
+    switch (Aggregation.processStatus) {
+        case Enumerator.ProcessStatus.RAW:
+            processStatusStyle = 'info';
+            processStatusText = "Aguardando";
+            processStatusIcon = "schedule";
+            break;
+        case Enumerator.ProcessStatus.PRE_PROCESSING:
+            processStatusStyle = 'warning';
+            processStatusText = "Identificando";
+            processStatusIcon = "play_circle_outline";
+            break;
+        case Enumerator.ProcessStatus.PENDING:
+            processStatusStyle = 'pending';
+            processStatusText = "Pendente";
+            processStatusIcon = "schedule";
+            break;
+        case Enumerator.ProcessStatus.PROCESSING:
+            processStatusStyle = 'processing';
+            processStatusText = "Corrigindo";
+            processStatusIcon = "play_circle_outline";
+            break;
+        case Enumerator.ProcessStatus.ERROR:
+            processStatusStyle = 'danger';
+            processStatusText = "Erro";
+            processStatusIcon = "error_outline";
+            break;
+        case Enumerator.ProcessStatus.DOWNLOADING:
+            processStatusStyle = 'download';
+            processStatusText = "Baixando";
+            processStatusIcon = "file_download";
+            break;
+        case Enumerator.ProcessStatus.UPLOADING:
+            processStatusStyle = 'upload';
+            processStatusText = "Enviando";
+            processStatusIcon = "file_upload";
+            break;
+        default:
+            processStatusStyle = 'success';
+            processStatusText = "Finalizado";
+            processStatusIcon = "done";
+            break;
+    }
+
+    if (Aggregation._template.ref.type == Enumerator.TemplateType.KINDERGARTEN) templateTypeText = 'Infantil';
+    else if (Aggregation._template.ref.type == Enumerator.TemplateType.ELEMENTARY_SCHOOL) templateTypeText = 'Fundamental';
+    else templateTypeText = 'Médio';
+%>
+
+<div class="apoio">
+    <div class="container">
+        <ul class="info-bar inverse">
+            <li>
+                <a href="/aggregation"><i class="material-icons">arrow_back</i></a>
+            </li>
+            <li>
+                <span>
+                    <span class="indicador">ID Externo do Lote</span>
+                    <%= Aggregation.externalId %>
+                </span>
+            </li>
+            <li>
+                <span>
+                    <span class="indicador">ID Externo da Prova</span>
+                    <%= Aggregation._template.externalId %>
+                </span>
+            </li>
+            <% if (Aggregation.processStatus != Enumerator.ProcessStatus.PENDING) { %>
+                <li>
+                    <span>
+                        <span class="indicador">Data do Processamento</span> <%= processDate %>
+                    </span>
+                </li>
+            <% } %>
+            <li>
+                <span>
+                    <span class="indicador">Status</span> <span class="label label-<%= processStatusStyle %>"><a href="/aggregation/?processStatus=<%= Aggregation.processStatus %>"><i class="material-icons"><%= processStatusIcon %></i><%= processStatusText %></a></span>
+                </span>
+            </li>
+        </ul>
+
+    </div>
+
+</div>
+<article class="container container-principal">
+    <div class="table-heading">
+        <div class="row">
+            <h1 class="col-md-10">Gabarito</h1>
+
+            <div class="col-md-2 pull-right text-right">
+                <a href="/template/<%= Aggregation._template.ref._id %>" class="btn pull-right"><i class="material-icons">search</i>Visualizar Gabarito</a>
+            </div>
+        </div>
+        <div class="row">
+            <ul class="info-bar col-md-10">
+                <li>
+                    <i class="material-icons">turned_in</i>
+                    <span>
+                        <span class="indicador">Identificação</span> <% if (Aggregation._template.ref.qrCode) { %> QR Code <% } else { %> Manual <% } %>
+                    </span>
+                </li>
+                <li>
+                    <i class="material-icons">list_number</i>
+                    <span>
+                        <span class="indicador">Questões</span> <%= Aggregation._template.ref.questions %>
+                    </span>
+                </li>
+                <li>
+                    <i class="material-icons">filter_<%= Aggregation._template.ref.alternatives %></i>
+                    <span>
+                        <span class="indicador">Alternativas</span> <%= Aggregation._template.ref.alternatives %>
+                    </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="table-heading">
+        <div class="row">
+            <h1 class="col-md-10">Provas</h1>
+
+            <div class="col-md-2 pull-right text-right">
+                <a href="/aggregation/<%= Aggregation._id %>/exam" class="btn pull-right"><i class="material-icons">search</i>Visualizar Provas</a>
+            </div>
+        </div>
+        <div class="row">
+            <ul class="info-bar col-md-10">
+                <li>
+                    <span class="material-icons">done_all</span>
+                    <span>
+                        <span class="indicador">Total</span> <%= Aggregation.exam.total %>
+                    </span>
+                </li>
+                <li>
+                    <span class="material-icons text-success">done</span>
+                    <span>
+                        <span class="indicador">Sucesso</span> <%= Aggregation.exam.success %>
+                    </span>
+                </li>
+                <li>
+                    <span class="material-icons text-warning">info_outline</span>
+                    <span>
+                        <span class="indicador">Atenção</span> <%= Aggregation.exam.warning %>
+                    </span>
+                </li>
+                <li>
+                    <span class="material-icons text-danger">error_outline</span>
+                    <span>
+                        <span class="indicador">Erro</span> <%= Aggregation.exam.error %>
+                    </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <% if (Aggregation.sync && Aggregation.sync.total > 0 && Aggregation.sync.sent >= 0) { %>
+        <div class="table-heading">
+            <div class="row">
+                <h1 class="col-md-10">Turmas Sincronizadas</h1>
+            </div>
+            <div class="row">
+                <ul class="info-bar col-md-10">
+                    <li>
+                        <span class="material-icons">done</span>
+                        <span>
+                            <span class="indicador">Enviadas</span> <%= Aggregation.sync.sent %>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="material-icons">file_upload</span>
+                        <span>
+                            <span class="indicador">Total</span> <%= Aggregation.sync.total %>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    <% } %>
+</article>
+
+<% include ../../_partial/footer.ejs %>

@@ -1,0 +1,20 @@
+<% include ../../_partial/header.ejs %>
+<% include ../../_partial/navbar.ejs %>
+
+<div class="heading-page">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li><a href="/">Dashboard</a></li>
+            <li><a href="/aggregation">Lotes</a></li>
+            <li><a href="/aggregation/<%= AggregationId %>"><%= AggregationId %></a></li>
+            <li class="active">Provas</li>
+        </ol>
+        <h2>Provas</h2>
+    </div>
+</div>
+<article class="container container-principal">
+    <% include ../../_partial/component/exam/list-filter.ejs %>
+    <% include ../../_partial/component/exam/list-table.ejs %>
+</article>
+
+<% include ../../_partial/footer.ejs %>

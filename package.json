@@ -1,0 +1,44 @@
+{
+  "name": "mstech-omr-admin-ui",
+  "version": "2.5.0",
+  "description": "OMR Admin UI",
+  "main": "./src/App.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "virgilio.neto@mstech.com.br",
+  "license": "MStech",
+  "repository": "http://gerrit.mstech.com.br/omr-admin-ui",
+  "dependencies": {
+    "agenda": "^0.8.1",
+    "async": "^1.4.2",
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.14.1",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.0",
+    "cors": "^2.7.1",
+    "ejs": "^2.3.4",
+    "express": "^4.13.3",
+    "express-ejs-layouts": "^2.0.0",
+    "express-session": "^1.12.1",
+    "extend": "^3.0.0",
+    "jsonwebtoken": "^5.4.0",
+    "mongoose": "^4.6.0",
+    "morgan": "^1.6.1",
+    "mssql": "^2.4.0",
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
+    "passport-saml": "^0.14.0",
+    "winston": "^2.2.0",
+    "winston-mongodb": "^1.6.1"
+  },
+  "devDependencies": {
+    "complexity": "0.0.3",
+    "grunt": "^0.4.5",
+    "load-grunt-tasks": "^3.3.0",
+    "time-grunt": "^1.2.1"
+  }
+}

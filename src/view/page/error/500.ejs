@@ -1,0 +1,20 @@
+<% include ../../_partial/header.ejs %>
+<% include ../../_partial/navbar.ejs %>
+
+<section class="container content-wrapper">
+    <div class="container-fluid">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h1><%= Error.Title %></h1>
+            </div>
+            <div class="panel-body">
+                <%= Error.Message %>
+            </div>
+            <div class="panel-footer">
+                <a class="btn btn-primary btn-lg" href="/" role="button"><%= Error.buttonText? Error.buttonText: "Dashboard" %></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<% include ../../_partial/footer.ejs %>
